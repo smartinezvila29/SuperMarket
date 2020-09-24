@@ -45,7 +45,7 @@ public class Supermarket {
 	public Product getProduct(int idProduct){
 		Product p = null;
 		int i = 0;
-		while (admProduct.getLstProduct().size() <= i && p==null){
+		while (admProduct.getLstProduct().size() >= i && p==null){
 			if (admProduct.getLstProduct().get(i).getIdProduct() == idProduct) {
 				p = admProduct.getLstProduct().get(i);
 			}
@@ -75,8 +75,8 @@ public class Supermarket {
 		boolean flag = false;
 		int idCart = 1;
 		int idItem = 1;
-		while (admCart.getLstCart().size()<=idCart && !admCart.getLstCart().isEmpty()) {
-			while (admCart.getLstCart().get(idCart).getLstItemCart().size()<=idItem && admCart.getLstCart().get(idCart).getLstItemCart().isEmpty()) {
+		while (admCart.getLstCart().size()>=idCart && !admCart.getLstCart().isEmpty()) {
+			while (admCart.getLstCart().get(idCart).getLstItemCart().size()>=idItem && !admCart.getLstCart().get(idCart).getLstItemCart().isEmpty()) {
 				if (admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct().getIdProduct() == product.getIdProduct()) {
 					if (admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity() > quantity) { /*if the quantity that i have is bigger than quantity rest quantity to that*/
 						admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).setQuantity(admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity()-quantity);
@@ -98,10 +98,10 @@ public class Supermarket {
 	
 	/*calculate total*/
 	public float calculateTotal() {
-		int idCart = 1;
-		int idItem = 1;
+		int idCart = 0;
+		int idItem = 0;
 		float total = 0;
-		while (!admCart.getLstCart().isEmpty() && admCart.getLstCart().size()<=idCart) {
+		while (!admCart.getLstCart().isEmpty() && admCart.getLstCart().size()>=idCart) {
 			total = 0;
 			while (!admCart.getLstCart().get(idCart).getLstItemCart().isEmpty() && admCart.getLstCart().get(idCart).getLstItemCart().size()<=idItem) {
 				total = total + (admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity()*admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct().getCost());
@@ -148,6 +148,12 @@ public class Supermarket {
 	/*remove client*/
 	public boolean deleteClient(int idClient)throws Exception {
 		if (getClient(idClient)==null)throw new Exception("The client doesnt exist.");
+		int i = 0;
+		while (admCart.getLstCart().size() >= i) {
+			if (admCart.getLstCart().get(i).getClient().getIdClient()==idClient) {
+				if (!admCart.getLstCart().get(i).getLstItemCart().isEmpty())throw new Exception("The client have products to pay.");
+			}
+		}
 		return admClient.getLstClient().remove(admClient.getLstClient().get(idClient));
 	}
 	
@@ -157,4 +163,44 @@ public class Supermarket {
 		if (!admCart.getLstCart().isEmpty()) idCart = admCart.getLstCart().get(admCart.getLstCart().size()).getIdCart()+1;
 		return admCart.getLstCart().add(new Cart(idCart, dateHour, client));
 	}
+	
+	/*get cart*/
+	public Cart getCart (int idCart) throws Exception{
+		Cart c = null;
+		int i = 0;
+		while (i <= admCart.getLstCart().size() && c == null) {
+			if (admCart.getLstCart().get(i).getIdCart()==idCart) {
+				c = admCart.getLstCart().get(i);
+			}
+			i++;
+		}
+		return c;
+	}
+	
+	/*delete cart*/
+	public boolean deleteCart(int idCart)throws Exception{
+		if (getCart(idCart)!=null) throw new Exception("The cart doesnt exists.");
+		return admCart.getLstCart().remove(admCart.getLstCart().get(idCart));
+	}
+	
+	/*calculate total by client*/
+	public float calculateTotal(Client client)throws Exception {
+		if (getClient(client.getIdClient())!=null)throw new Exception("The client doesnt exists.");
+		int idCart=0;
+		float total=0;
+		while (admCart.getLstCart().size()>=idCart) {
+			if (admCart.getLstCart().get(idCart).getClient().getIdClient()==client.getIdClient()) {
+				int idItem = 0;
+				while (admCart.getLstCart().get(idCart).getLstItemCart().size()>=idItem) {
+					total = total + (admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct().getCost()*admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity());
+					deleteItemCart(admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct(), admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity());
+					idItem++;
+				}
+			}
+			idCart++;
+		}
+		return total;
+	}
+	
+	/*test commit*/
 }
