@@ -202,5 +202,23 @@ public class Supermarket {
 		return total;
 	}
 	
-	/*test commit*/
+	public float calculateTotal(int dniClient)throws Exception {
+		if (getClient(dniClient)!=null)throw new Exception("The client doesnt exists.");
+		int idCart=0;
+		float total=0;
+		while (admCart.getLstCart().size()>=idCart) {
+			if (admCart.getLstCart().get(idCart).getClient().getDni()==dniClient) {
+				int idItem = 0;
+				while (admCart.getLstCart().get(idCart).getLstItemCart().size()>=idItem) {
+					total = total + (admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct().getCost()*admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity());
+					deleteItemCart(admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getProduct(), admCart.getLstCart().get(idCart).getLstItemCart().get(idItem).getQuantity());
+					idItem++;
+				}
+			}
+			idCart++;
+		}
+		return total;
+	}
+	
+	
 }
